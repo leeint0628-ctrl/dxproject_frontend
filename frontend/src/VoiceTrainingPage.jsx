@@ -9,13 +9,13 @@ import './voice-training.css';
 
 const asset = (name) => `/assets/${name}`;
 
-function VoiceHeader({ onBack }) {
+function VoiceHeader({ onBack, title = '맞춤 목소리' }) {
   return (
     <header className="voice-header">
       <button type="button" onClick={onBack} aria-label="이전 화면으로 돌아가기">
         <img src={asset('nav-back.svg')} alt="" />
       </button>
-      <h1>맞춤 목소리</h1>
+      <h1>{title}</h1>
     </header>
   );
 }
@@ -225,7 +225,7 @@ function VoiceFlow({ onExit, onRecordingReady, onSubmitVoice, onPreviewSample, o
 
   return (
     <div className="voice-flow">
-      <VoiceHeader onBack={goBack} />
+      <VoiceHeader onBack={goBack} title="맞춤 목소리 등록하기" />
       <div className="voice-flow-content">
         <StepProgress activeStep={step} />
         {step === 1 && <StartStep />}
