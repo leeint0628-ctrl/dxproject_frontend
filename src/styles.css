@@ -1,0 +1,359 @@
+:root {
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+  color: #111;
+  background: #dfe2e7;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  min-width: 320px;
+  background: #dfe2e7;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+.app-shell {
+  width: 100%;
+  max-width: 393px;
+  height: 100dvh;
+  margin: 0 auto;
+  overflow: hidden;
+  background: #eff1f4;
+}
+
+.status-bar {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  height: 56px;
+  padding: 21px 34px 19px 48px;
+  background: #eff1f4;
+  color: #000;
+  flex: 0 0 56px;
+  user-select: none;
+}
+
+.status-time {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 22px;
+  letter-spacing: -0.2px;
+  white-space: nowrap;
+}
+
+.status-levels {
+  display: flex;
+  height: 22px;
+  align-items: center;
+  gap: 7px;
+  padding-top: 1px;
+}
+
+.status-levels img {
+  display: block;
+  width: 19.2px;
+  height: 12.23px;
+}
+
+.status-levels img:nth-child(2) {
+  width: 17.14px;
+  height: 12.33px;
+}
+
+.status-levels .status-battery {
+  width: 27.33px;
+  height: 13px;
+}
+
+.screen-scroll {
+  height: calc(100dvh - 56px);
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.screen-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 12px 20px;
+  background: #eff1f4;
+}
+
+.app-header h1 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.55px;
+}
+
+.header-icons {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.header-icons img {
+  display: block;
+  width: 24px;
+  height: 24px;
+}
+
+.screen-body {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  width: 100%;
+  padding-bottom: max(24px, env(safe-area-inset-bottom));
+}
+
+.overview {
+  display: flex;
+  flex-direction: column;
+}
+
+.quick-menu {
+  display: grid;
+  grid-template-columns: repeat(2, 172px);
+  gap: 9px;
+  padding: 12px 20px;
+}
+
+.quick-menu-card {
+  display: flex;
+  width: 172px;
+  height: 72px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -0.28px;
+}
+
+.event-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: calc(100% - 40px);
+  margin: 0 20px;
+  padding: 10px 20px;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.event-photo {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  flex: 0 0 48px;
+  overflow: hidden;
+  border-radius: 50%;
+}
+
+.event-photo img {
+  position: absolute;
+  top: -26.51%;
+  left: -46.47%;
+  width: 178.01%;
+  height: 133.51%;
+  max-width: none;
+}
+
+.event-copy {
+  display: flex;
+  min-width: 0;
+  width: 253px;
+  flex-direction: column;
+  gap: 6px;
+  line-height: 1;
+}
+
+.event-copy h2,
+.event-copy p,
+.event-copy time {
+  width: 100%;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: clip;
+  white-space: nowrap;
+}
+
+.event-copy h2 {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.6px;
+}
+
+.event-copy p {
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: -0.35px;
+}
+
+.event-copy time {
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: -0.1px;
+}
+
+.menu-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.menu-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 20px;
+}
+
+.menu-section > h2 {
+  width: 100%;
+  margin: 0;
+  color: #606c80;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.3px;
+}
+
+.menu-card {
+  width: 100%;
+  padding: 8px 20px;
+  overflow: hidden;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.menu-row {
+  display: flex;
+  width: 100%;
+  height: 40px;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 0;
+  border: 0;
+  background: transparent;
+  color: #111;
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: -0.35px;
+  text-align: left;
+}
+
+button.menu-row {
+  appearance: none;
+}
+
+.menu-row--enabled {
+  margin: 0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.menu-row--enabled:active {
+  opacity: 0.58;
+}
+
+.menu-row--enabled:focus-visible {
+  border-radius: 4px;
+  outline: 2px solid #7656ff;
+  outline-offset: 2px;
+}
+
+.menu-divider {
+  width: calc(100% - 38px);
+  height: 18px;
+  margin-left: 38px;
+  border-top: 1px solid #e9ebef;
+  transform: translateY(8px);
+}
+
+.menu-icon {
+  display: block;
+  width: 24px;
+  height: 24px;
+  flex: 0 0 24px;
+  overflow: hidden;
+  background-repeat: no-repeat;
+}
+
+.menu-icon--mypage,
+.menu-icon--support,
+.menu-icon--diagnosis,
+.menu-icon--product-info,
+.menu-icon--manual,
+.menu-icon--subscription,
+.menu-icon--play,
+.menu-icon--routine {
+  background-image: url('/assets/menu-sprite.png');
+  background-size: 393px 852px;
+}
+
+.menu-icon--mypage { background-position: -94.22px -126.82px; }
+.menu-icon--support { background-position: -274.42px -126.82px; }
+.menu-icon--diagnosis { background-position: -39.65px -371.9px; }
+.menu-icon--product-info { background-position: -39.65px -428.38px; }
+.menu-icon--manual { background-position: -39.65px -484.36px; }
+.menu-icon--subscription { background-position: -39.65px -540.73px; }
+.menu-icon--play { background-position: -39.65px -641.78px; }
+.menu-icon--routine { background-position: -39.65px -698.76px; }
+
+.menu-icon--neulbom {
+  background-image: url('/assets/neulbom-icon.png');
+  background-position: -6px -6px;
+  background-size: 36px 36px;
+}
+
+.menu-icon--guide {
+  background-image: url('/assets/thinq-guide-icon.png');
+  background-position: -41.02px -290.83px;
+  background-size: 393px 842.87px;
+}
+
+@media (min-width: 394px) {
+  .app-shell {
+    box-shadow: 0 18px 52px rgb(37 45 58 / 18%);
+  }
+}
