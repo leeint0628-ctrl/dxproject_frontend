@@ -565,10 +565,23 @@
 
 .custom-care-card {
   position: relative;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  text-align: left;
 }
 
 .custom-care-copy {
   flex: 1;
+}
+
+.custom-care-card--enabled {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.custom-care-card--enabled:active {
+  opacity: 0.62;
 }
 
 .daily-report {

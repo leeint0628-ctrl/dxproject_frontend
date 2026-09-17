@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import DailyReport from './DailyReport.jsx';
+import VoiceTrainingPage from './VoiceTrainingPage.jsx';
 import { applianceUsageMock, careFeatures, customCareSettings } from './data/neulbomData.js';
 import './neulbom.css';
 
@@ -209,22 +210,38 @@ function ApplianceSection({ devices }) {
   );
 }
 
-function CustomCareSection() {
+function CustomCareCard({ setting, onOpenVoice }) {
+  const content = (
+    <>
+      <span className="custom-care-icon" aria-hidden="true">
+        <img src={asset(setting.icon)} alt="" />
+      </span>
+      <div className="custom-care-copy">
+        <h3>{setting.title}</h3>
+        <p>{setting.description}</p>
+      </div>
+      <img className="row-chevron" src={asset('chevron-right.svg')} alt="" />
+    </>
+  );
+
+  if (setting.id === 'voice') {
+    return (
+      <button type="button" className="custom-care-card custom-care-card--enabled" onClick={onOpenVoice}>
+        {content}
+      </button>
+    );
+  }
+
+  return <div className="custom-care-card">{content}</div>;
+}
+
+function CustomCareSection({ onOpenVoice }) {
   return (
     <section className="care-section">
       <SectionTitle>맞춤 돌봄 설정</SectionTitle>
       <div className="custom-care-list">
         {customCareSettings.map((setting) => (
-          <div className="custom-care-card" key={setting.id}>
-            <span className="custom-care-icon" aria-hidden="true">
-              <img src={asset(setting.icon)} alt="" />
-            </span>
-            <div className="custom-care-copy">
-              <h3>{setting.title}</h3>
-              <p>{setting.description}</p>
-            </div>
-            <img className="row-chevron" src={asset('chevron-right.svg')} alt="" />
-          </div>
+          <CustomCareCard setting={setting} onOpenVoice={onOpenVoice} key={setting.id} />
         ))}
       </div>
     </section>
@@ -233,6 +250,11 @@ function CustomCareSection() {
 
 export default function NeulbomPage({ onBack, applianceUsage = applianceUsageMock }) {
   const [activeTab, setActiveTab] = useState('care');
+  const [subPage, setSubPage] = useState('dashboard');
+
+  if (subPage === 'voice') {
+    return <VoiceTrainingPage onBack={() => setSubPage('dashboard')} />;
+  }
 
   return (
     <div className="neulbom-page">
@@ -245,7 +267,7 @@ export default function NeulbomPage({ onBack, applianceUsage = applianceUsageMoc
             <ManagedSummary />
             <CareFeatureList />
             <ApplianceSection devices={applianceUsage} />
-            <CustomCareSection />
+            <CustomCareSection onOpenVoice={() => setSubPage('voice')} />
           </div>
         ) : (
           <div className="tab-panel tab-panel--report" key="report">
