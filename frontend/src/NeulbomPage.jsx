@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import DailyReport from './DailyReport.jsx';
+import PreferredContentPage from './PreferredContentPage.jsx';
 import VoiceTrainingPage from './VoiceTrainingPage.jsx';
 import { applianceUsageMock, careFeatures, customCareSettings } from './data/neulbomData.js';
 import './neulbom.css';
@@ -210,7 +211,7 @@ function ApplianceSection({ devices }) {
   );
 }
 
-function CustomCareCard({ setting, onOpenVoice }) {
+function CustomCareCard({ setting, onOpenVoice, onOpenContent }) {
   const content = (
     <>
       <span className="custom-care-icon" aria-hidden="true">
@@ -224,9 +225,11 @@ function CustomCareCard({ setting, onOpenVoice }) {
     </>
   );
 
-  if (setting.id === 'voice') {
+  const onOpen = setting.id === 'voice' ? onOpenVoice : setting.id === 'content' ? onOpenContent : null;
+
+  if (onOpen) {
     return (
-      <button type="button" className="custom-care-card custom-care-card--enabled" onClick={onOpenVoice}>
+      <button type="button" className="custom-care-card custom-care-card--enabled" onClick={onOpen}>
         {content}
       </button>
     );
@@ -235,13 +238,18 @@ function CustomCareCard({ setting, onOpenVoice }) {
   return <div className="custom-care-card">{content}</div>;
 }
 
-function CustomCareSection({ onOpenVoice }) {
+function CustomCareSection({ onOpenVoice, onOpenContent }) {
   return (
     <section className="care-section">
       <SectionTitle>맞춤 돌봄 설정</SectionTitle>
       <div className="custom-care-list">
         {customCareSettings.map((setting) => (
-          <CustomCareCard setting={setting} onOpenVoice={onOpenVoice} key={setting.id} />
+          <CustomCareCard
+            setting={setting}
+            onOpenVoice={onOpenVoice}
+            onOpenContent={onOpenContent}
+            key={setting.id}
+          />
         ))}
       </div>
     </section>
@@ -256,6 +264,10 @@ export default function NeulbomPage({ onBack, applianceUsage = applianceUsageMoc
     return <VoiceTrainingPage onBack={() => setSubPage('dashboard')} />;
   }
 
+  if (subPage === 'content') {
+    return <PreferredContentPage onBack={() => setSubPage('dashboard')} />;
+  }
+
   return (
     <div className="neulbom-page">
       <PageHeader onBack={onBack} />
@@ -267,7 +279,10 @@ export default function NeulbomPage({ onBack, applianceUsage = applianceUsageMoc
             <ManagedSummary />
             <CareFeatureList />
             <ApplianceSection devices={applianceUsage} />
-            <CustomCareSection onOpenVoice={() => setSubPage('voice')} />
+            <CustomCareSection
+              onOpenVoice={() => setSubPage('voice')}
+              onOpenContent={() => setSubPage('content')}
+            />
           </div>
         ) : (
           <div className="tab-panel tab-panel--report" key="report">
