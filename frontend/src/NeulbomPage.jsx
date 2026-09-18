@@ -1,8 +1,12 @@
 import { useState } from 'react';
+import CalmCarePage from './CalmCarePage.jsx';
 import DailyReport from './DailyReport.jsx';
+import DailyLifeCarePage from './DailyLifeCarePage.jsx';
+import MealMedicationCarePage from './MealMedicationCarePage.jsx';
 import PreferredContentPage from './PreferredContentPage.jsx';
 import VoiceTrainingPage from './VoiceTrainingPage.jsx';
 import { applianceUsageMock, careFeatures, customCareSettings } from './data/neulbomData.js';
+import { mealMedicationCareMock } from './data/mealMedicationData.js';
 import './neulbom.css';
 
 const asset = (name) => `/assets/${name}`;
@@ -92,23 +96,48 @@ function SectionTitle({ children }) {
   return <h2 className="care-section-title">{children}</h2>;
 }
 
-function CareFeatureList() {
+function CareFeatureList({ onOpenDailyLife, onOpenMealMedication, onOpenCalm }) {
   return (
     <section className="care-section">
       <SectionTitle>돌봄 기능 관리</SectionTitle>
       <div className="care-feature-list">
-        {careFeatures.map((feature) => (
-          <div className="care-feature-card" key={feature.id}>
-            <div className="care-feature-main">
-              <CareIcon feature={feature} />
-              <div className="care-feature-copy">
-                <h3>{feature.title}</h3>
-                <p>{feature.description.map((line) => <span key={line}>{line}</span>)}</p>
+        {careFeatures.map((feature) => {
+          const content = (
+            <>
+              <div className="care-feature-main">
+                <CareIcon feature={feature} />
+                <div className="care-feature-copy">
+                  <h3>{feature.title}</h3>
+                  <p>{feature.description.map((line) => <span key={line}>{line}</span>)}</p>
+                </div>
               </div>
-            </div>
-            <img className="row-chevron" src={asset('chevron-right.svg')} alt="" />
-          </div>
-        ))}
+              <img className="row-chevron" src={asset('chevron-right.svg')} alt="" />
+            </>
+          );
+
+          const onOpen = feature.id === 'daily-life'
+            ? onOpenDailyLife
+            : feature.id === 'meal-medication'
+              ? onOpenMealMedication
+              : feature.id === 'calm'
+                ? onOpenCalm
+                : null;
+
+          if (onOpen) {
+            return (
+              <button
+                type="button"
+                className="care-feature-card care-feature-card--enabled"
+                onClick={onOpen}
+                key={feature.id}
+              >
+                {content}
+              </button>
+            );
+          }
+
+          return <div className="care-feature-card" key={feature.id}>{content}</div>;
+        })}
       </div>
     </section>
   );
@@ -259,13 +288,54 @@ function CustomCareSection({ onOpenVoice, onOpenContent }) {
 export default function NeulbomPage({ onBack, applianceUsage = applianceUsageMock }) {
   const [activeTab, setActiveTab] = useState('care');
   const [subPage, setSubPage] = useState('dashboard');
+  const [subPageReturn, setSubPageReturn] = useState('dashboard');
+  const [dailyLifeEnabled, setDailyLifeEnabled] = useState(false);
+  const [mealMedicationSettings, setMealMedicationSettings] = useState(mealMedicationCareMock);
+  const [calmCareEnabled, setCalmCareEnabled] = useState(false);
+
+  const openSubPage = (page, returnTo = 'dashboard') => {
+    setSubPageReturn(returnTo);
+    setSubPage(page);
+  };
 
   if (subPage === 'voice') {
-    return <VoiceTrainingPage onBack={() => setSubPage('dashboard')} />;
+    return <VoiceTrainingPage onBack={() => setSubPage(subPageReturn)} />;
   }
 
   if (subPage === 'content') {
-    return <PreferredContentPage onBack={() => setSubPage('dashboard')} />;
+    return <PreferredContentPage onBack={() => setSubPage(subPageReturn)} />;
+  }
+
+  if (subPage === 'daily-life') {
+    return (
+      <DailyLifeCarePage
+        onBack={() => setSubPage('dashboard')}
+        initialEnabled={dailyLifeEnabled}
+        onEnabledChange={setDailyLifeEnabled}
+      />
+    );
+  }
+
+  if (subPage === 'meal-medication') {
+    return (
+      <MealMedicationCarePage
+        onBack={() => setSubPage('dashboard')}
+        settings={mealMedicationSettings}
+        onSettingsChange={setMealMedicationSettings}
+      />
+    );
+  }
+
+  if (subPage === 'calm') {
+    return (
+      <CalmCarePage
+        onBack={() => setSubPage('dashboard')}
+        enabled={calmCareEnabled}
+        onEnabledChange={setCalmCareEnabled}
+        onOpenVoice={() => openSubPage('voice', 'calm')}
+        onOpenContent={() => openSubPage('content', 'calm')}
+      />
+    );
   }
 
   return (
@@ -277,11 +347,15 @@ export default function NeulbomPage({ onBack, applianceUsage = applianceUsageMoc
           <div className="care-content tab-panel tab-panel--care" key="care">
             <EmergencyCard />
             <ManagedSummary />
-            <CareFeatureList />
+            <CareFeatureList
+              onOpenDailyLife={() => setSubPage('daily-life')}
+              onOpenMealMedication={() => setSubPage('meal-medication')}
+              onOpenCalm={() => setSubPage('calm')}
+            />
             <ApplianceSection devices={applianceUsage} />
             <CustomCareSection
-              onOpenVoice={() => setSubPage('voice')}
-              onOpenContent={() => setSubPage('content')}
+              onOpenVoice={() => openSubPage('voice')}
+              onOpenContent={() => openSubPage('content')}
             />
           </div>
         ) : (

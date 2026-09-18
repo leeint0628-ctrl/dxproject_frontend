@@ -263,6 +263,19 @@
   background: #fff;
 }
 
+.care-feature-card--enabled {
+  border: 0;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.care-feature-card--enabled:active {
+  opacity: 0.62;
+}
+
 .care-feature-main {
   display: flex;
   min-width: 0;
