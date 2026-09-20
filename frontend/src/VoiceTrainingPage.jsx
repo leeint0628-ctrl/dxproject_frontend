@@ -9,18 +9,23 @@ import './voice-training.css';
 
 const asset = (name) => `/assets/${name}`;
 
-function VoiceHeader({ onBack, title = '맞춤 목소리' }) {
+function VoiceHeader({ onBack, title = '맞춤 목소리', onDelete }) {
   return (
     <header className="voice-header">
       <button type="button" onClick={onBack} aria-label="이전 화면으로 돌아가기">
         <img src={asset('nav-back.svg')} alt="" />
       </button>
       <h1>{title}</h1>
+      {onDelete && (
+        <button className="voice-header-delete" type="button" onClick={onDelete} aria-label="목소리 삭제">
+          <img src={asset('delete-red.svg')} alt="" />
+        </button>
+      )}
     </header>
   );
 }
 
-function VoiceOverview({ voices, onRegister }) {
+function VoiceOverview({ voices, onRegister, onSelectVoice }) {
   return (
     <div className="voice-overview">
       <section className="voice-intro-card">
@@ -41,10 +46,10 @@ function VoiceOverview({ voices, onRegister }) {
         <div className="registered-voice-list">
           {voices.map((voice, index) => (
             <div className="registered-voice-entry" key={voice.id}>
-              <div className="registered-voice-row">
+              <button type="button" className="registered-voice-row" onClick={() => onSelectVoice(voice)}>
                 <span>{voice.name}</span>
                 <img src={asset('chevron-right.svg')} alt="" />
-              </div>
+              </button>
               {index < voices.length - 1 && <div className="registered-voice-divider" />}
             </div>
           ))}
@@ -93,17 +98,21 @@ function formatSeconds(seconds) {
   return `00:${String(seconds).padStart(2, '0')}`;
 }
 
-function AudioControl({ mode, seconds, isRecording, onToggle }) {
+function AudioControl({ mode, seconds, isRecording, isPlaying, onToggle }) {
   const isRecordMode = mode === 'record';
+  const isActive = isRecordMode ? isRecording : isPlaying;
   return (
     <div className="voice-audio-control">
       <button
         type="button"
-        className={`voice-audio-button${isRecording ? ' voice-audio-button--recording' : ''}`}
+        className={`voice-audio-button${isRecording ? ' voice-audio-button--recording' : ''}${isPlaying ? ' voice-audio-button--playing' : ''}`}
         onClick={onToggle}
-        aria-label={isRecordMode ? (isRecording ? '녹음 중지' : '녹음 시작') : '녹음본 재생'}
+        aria-label={isRecordMode ? (isRecording ? '녹음 중지' : '녹음 시작') : (isPlaying ? '녹음본 재생 중지' : '녹음본 재생')}
+        aria-pressed={isActive}
       >
-        <img src={asset(isRecordMode ? 'voice-microphone.svg' : 'voice-play-large.svg')} alt="" />
+        {isPlaying
+          ? <span className="voice-stop-large" aria-hidden="true" />
+          : <img src={asset(isRecordMode ? 'voice-microphone.svg' : 'voice-play-large.svg')} alt="" />}
       </button>
       <div className="voice-timer"><strong>{formatSeconds(seconds)}</strong><span>/</span><strong>01:00</strong></div>
       <p>{isRecordMode ? '1분을 넘기면 자동으로 중단돼요.' : '재생 버튼을 통해 녹음본을 확인해주세요.'}</p>
@@ -125,10 +134,10 @@ function RecordStep({ seconds, isRecording, onToggle }) {
   );
 }
 
-function ReviewStep({ seconds, onReplay, onRetry }) {
+function ReviewStep({ seconds, isPlaying, onReplay, onRetry }) {
   return (
     <div className="voice-review-step">
-      <AudioControl mode="play" seconds={seconds} onToggle={onReplay} />
+      <AudioControl mode="play" seconds={seconds} isPlaying={isPlaying} onToggle={onReplay} />
       <section className="voice-review-card">
         <div>
           <h2>녹음이 완료되었어요.</h2>
@@ -136,6 +145,44 @@ function ReviewStep({ seconds, onReplay, onRetry }) {
         </div>
         <button type="button" className="voice-secondary-button" onClick={onRetry}>다시 녹음하기</button>
       </section>
+    </div>
+  );
+}
+
+function VoiceSampleList({ phrases = voiceSamplePhrases, onPreviewSample }) {
+  const [playingSample, setPlayingSample] = useState(null);
+
+  useEffect(() => {
+    if (!playingSample) return undefined;
+    const timer = window.setTimeout(() => setPlayingSample(null), 2500);
+    return () => window.clearTimeout(timer);
+  }, [playingSample]);
+
+  const toggleSample = (phrase) => {
+    const willPlay = playingSample !== phrase;
+    setPlayingSample(willPlay ? phrase : null);
+    onPreviewSample?.(phrase, { action: willPlay ? 'play' : 'stop' });
+  };
+
+  return (
+    <div className="voice-sample-list">
+      {phrases.map((phrase) => {
+        const isPlaying = playingSample === phrase;
+        return (
+          <button
+            type="button"
+            key={phrase}
+            onClick={() => toggleSample(phrase)}
+            aria-label={`${phrase} ${isPlaying ? '재생 중지' : '재생'}`}
+            aria-pressed={isPlaying}
+          >
+            {isPlaying
+              ? <span className="voice-stop-small" aria-hidden="true" />
+              : <img src={asset('voice-play-small.svg')} alt="" />}
+            <span>{phrase}</span>
+          </button>
+        );
+      })}
     </div>
   );
 }
@@ -158,22 +205,75 @@ function CompleteStep({ voiceName, onVoiceNameChange, onPreviewSample }) {
           autoComplete="off"
         />
       </label>
-      <div className="voice-sample-list">
-        {voiceSamplePhrases.map((phrase) => (
-          <button type="button" key={phrase} onClick={() => onPreviewSample?.(phrase)}>
-            <img src={asset('voice-play-small.svg')} alt="" />
-            <span>{phrase}</span>
-          </button>
-        ))}
-      </div>
+      <VoiceSampleList onPreviewSample={onPreviewSample} />
     </section>
   );
 }
 
-function VoiceFlow({ onExit, onRecordingReady, onSubmitVoice, onPreviewSample, onComplete }) {
+function VoiceDetail({ voice, onBack, onSave, onDelete, onPreviewSample }) {
+  const [name, setName] = useState(voice.name);
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState('');
+
+  const save = async () => {
+    const trimmedName = name.trim();
+    if (!trimmedName || isSaving) return;
+    setIsSaving(true);
+    setError('');
+    try {
+      await onSave({ ...voice, name: trimmedName });
+    } catch {
+      setError('목소리 정보를 저장하지 못했어요. 다시 시도해주세요.');
+      setIsSaving(false);
+    }
+  };
+
+  const remove = async () => {
+    if (isSaving) return;
+    setIsSaving(true);
+    setError('');
+    try {
+      await onDelete(voice);
+    } catch {
+      setError('목소리를 삭제하지 못했어요. 다시 시도해주세요.');
+      setIsSaving(false);
+    }
+  };
+
+  return (
+    <div className="voice-detail-page">
+      <VoiceHeader title="목소리 수정하기" onBack={onBack} onDelete={remove} />
+      <div className="voice-detail-body">
+        <section className="voice-detail-card">
+          <VoiceSampleList phrases={voice.samples || voiceSamplePhrases} onPreviewSample={onPreviewSample} />
+          <label className="voice-name-field">
+            <span>목소리 이름</span>
+            <input
+              type="text"
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              maxLength={20}
+              autoComplete="off"
+            />
+          </label>
+          {error && <p className="voice-detail-error" role="alert">{error}</p>}
+        </section>
+      </div>
+      <div className="voice-detail-actions">
+        <button type="button" onClick={onBack} disabled={isSaving}>취소</button>
+        <button type="button" onClick={save} disabled={!name.trim() || isSaving}>
+          {isSaving ? '저장 중...' : '저장'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function VoiceFlow({ onExit, onRecordingReady, onReplayRecording, onSubmitVoice, onPreviewSample, onComplete }) {
   const [step, setStep] = useState(1);
   const [seconds, setSeconds] = useState(0);
   const [isRecording, setIsRecording] = useState(false);
+  const [isReviewPlaying, setIsReviewPlaying] = useState(false);
   const [voiceName, setVoiceName] = useState('');
 
   useEffect(() => {
@@ -194,8 +294,18 @@ function VoiceFlow({ onExit, onRecordingReady, onSubmitVoice, onPreviewSample, o
     return () => window.clearInterval(timer);
   }, [isRecording]);
 
+  useEffect(() => {
+    if (!isReviewPlaying) return undefined;
+    const timer = window.setTimeout(
+      () => setIsReviewPlaying(false),
+      Math.max(seconds, 3) * 1000,
+    );
+    return () => window.clearTimeout(timer);
+  }, [isReviewPlaying, seconds]);
+
   const goBack = () => {
     setIsRecording(false);
+    setIsReviewPlaying(false);
     if (step === 1) onExit();
     else setStep((current) => current - 1);
   };
@@ -223,6 +333,12 @@ function VoiceFlow({ onExit, onRecordingReady, onSubmitVoice, onPreviewSample, o
     setStep(2);
   };
 
+  const toggleReviewPlayback = () => {
+    const willPlay = !isReviewPlaying;
+    setIsReviewPlaying(willPlay);
+    onReplayRecording?.({ action: willPlay ? 'play' : 'stop', durationSeconds: seconds });
+  };
+
   return (
     <div className="voice-flow">
       <VoiceHeader onBack={goBack} title="맞춤 목소리 등록하기" />
@@ -236,7 +352,14 @@ function VoiceFlow({ onExit, onRecordingReady, onSubmitVoice, onPreviewSample, o
             onToggle={() => setIsRecording((current) => !current)}
           />
         )}
-        {step === 3 && <ReviewStep seconds={seconds} onReplay={() => {}} onRetry={resetRecording} />}
+        {step === 3 && (
+          <ReviewStep
+            seconds={seconds}
+            isPlaying={isReviewPlaying}
+            onReplay={toggleReviewPlayback}
+            onRetry={resetRecording}
+          />
+        )}
         {step === 4 && (
           <CompleteStep
             voiceName={voiceName}
@@ -258,12 +381,16 @@ export default function VoiceTrainingPage({
   onBack,
   voices = registeredVoicesMock,
   onRecordingReady,
+  onReplayRecording,
   onSubmitVoice,
   onPreviewSample,
   onComplete,
+  onUpdateVoice,
+  onDeleteVoice,
 }) {
   const [mode, setMode] = useState('overview');
   const [registeredVoices, setRegisteredVoices] = useState(voices);
+  const [selectedVoice, setSelectedVoice] = useState(null);
 
   useEffect(() => {
     document.querySelector('.screen-scroll')?.scrollTo({ top: 0 });
@@ -274,6 +401,7 @@ export default function VoiceTrainingPage({
       <VoiceFlow
         onExit={() => setMode('overview')}
         onRecordingReady={onRecordingReady}
+        onReplayRecording={onReplayRecording}
         onSubmitVoice={onSubmitVoice}
         onPreviewSample={onPreviewSample}
         onComplete={(voice) => {
@@ -287,10 +415,44 @@ export default function VoiceTrainingPage({
     );
   }
 
+  if (mode === 'detail' && selectedVoice) {
+    return (
+      <VoiceDetail
+        voice={selectedVoice}
+        onBack={() => {
+          setSelectedVoice(null);
+          setMode('overview');
+        }}
+        onPreviewSample={onPreviewSample}
+        onSave={async (updatedVoice) => {
+          await onUpdateVoice?.(updatedVoice);
+          setRegisteredVoices((current) => current.map((voice) => (
+            voice.id === updatedVoice.id ? updatedVoice : voice
+          )));
+          setSelectedVoice(null);
+          setMode('overview');
+        }}
+        onDelete={async (voiceToDelete) => {
+          await onDeleteVoice?.(voiceToDelete);
+          setRegisteredVoices((current) => current.filter((voice) => voice.id !== voiceToDelete.id));
+          setSelectedVoice(null);
+          setMode('overview');
+        }}
+      />
+    );
+  }
+
   return (
     <div className="voice-page">
       <VoiceHeader onBack={onBack} />
-      <VoiceOverview voices={registeredVoices} onRegister={() => setMode('flow')} />
+      <VoiceOverview
+        voices={registeredVoices}
+        onRegister={() => setMode('flow')}
+        onSelectVoice={(voice) => {
+          setSelectedVoice(voice);
+          setMode('detail');
+        }}
+      />
     </div>
   );
 }

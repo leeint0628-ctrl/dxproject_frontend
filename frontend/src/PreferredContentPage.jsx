@@ -4,13 +4,18 @@ import './preferred-content.css';
 
 const asset = (name) => `/assets/${name}`;
 
-function PreferredContentHeader({ title, onBack }) {
+function PreferredContentHeader({ title, onBack, onDelete }) {
   return (
     <header className="preferred-content-header">
       <button type="button" onClick={onBack} aria-label="이전 화면으로 돌아가기">
         <img src={asset('nav-back.svg')} alt="" />
       </button>
       <h1>{title}</h1>
+      {onDelete && (
+        <button className="preferred-content-header-delete" type="button" onClick={onDelete} aria-label="콘텐츠 삭제">
+          <img src={asset('delete-red.svg')} alt="" />
+        </button>
+      )}
     </header>
   );
 }
@@ -25,20 +30,20 @@ function ContentThumbnail({ content, large = false }) {
   );
 }
 
-function RegisteredContents({ contents }) {
+function RegisteredContents({ contents, onSelectContent }) {
   return (
     <section className="registered-contents">
       <h2>등록된 콘텐츠</h2>
       <div className="registered-content-list">
         {contents.map((content, index) => (
           <div className="registered-content-entry" key={content.id}>
-            <div className="registered-content-row">
+            <button type="button" className="registered-content-row" onClick={() => onSelectContent(content)}>
               <div className="registered-content-main">
                 <ContentThumbnail content={content} />
                 <span>{content.name}</span>
               </div>
               <img className="registered-content-chevron" src={asset('chevron-right.svg')} alt="" />
-            </div>
+            </button>
             {index < contents.length - 1 && <div className="registered-content-divider" />}
           </div>
         ))}
@@ -47,7 +52,7 @@ function RegisteredContents({ contents }) {
   );
 }
 
-function ContentOverview({ contents, onChooseImage, onChooseYoutube }) {
+function ContentOverview({ contents, onChooseImage, onChooseYoutube, onSelectContent }) {
   return (
     <div className="preferred-content-overview">
       <section className="preferred-content-intro">
@@ -73,7 +78,7 @@ function ContentOverview({ contents, onChooseImage, onChooseYoutube }) {
           </div>
         </div>
       </section>
-      <RegisteredContents contents={contents} />
+      <RegisteredContents contents={contents} onSelectContent={onSelectContent} />
     </div>
   );
 }
@@ -201,10 +206,71 @@ function ContentRegistration({ draft, name, onNameChange, onBack, onSave, isSavi
   );
 }
 
+function ContentDetail({ content, onBack, onSave, onDelete }) {
+  const [name, setName] = useState(content.name);
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState('');
+
+  const save = async () => {
+    const trimmedName = name.trim();
+    if (!trimmedName || isSaving) return;
+    setIsSaving(true);
+    setError('');
+    try {
+      await onSave({ ...content, name: trimmedName });
+    } catch {
+      setError('콘텐츠 정보를 저장하지 못했어요. 다시 시도해주세요.');
+      setIsSaving(false);
+    }
+  };
+
+  const remove = async () => {
+    if (isSaving) return;
+    setIsSaving(true);
+    setError('');
+    try {
+      await onDelete(content);
+    } catch {
+      setError('콘텐츠를 삭제하지 못했어요. 다시 시도해주세요.');
+      setIsSaving(false);
+    }
+  };
+
+  return (
+    <div className="preferred-content-detail-page">
+      <PreferredContentHeader title="콘텐츠 수정하기" onBack={onBack} onDelete={remove} />
+      <div className="preferred-content-detail-body">
+        <section className="preferred-content-detail-card">
+          <ContentThumbnail content={content} large />
+          <label className="preferred-content-name-field">
+            <span>콘텐츠 이름</span>
+            <input
+              type="text"
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              maxLength={30}
+              autoComplete="off"
+            />
+          </label>
+          {error && <p className="preferred-content-save-error" role="alert">{error}</p>}
+        </section>
+      </div>
+      <div className="preferred-content-detail-actions">
+        <button type="button" onClick={onBack} disabled={isSaving}>취소</button>
+        <button type="button" onClick={save} disabled={!name.trim() || isSaving}>
+          {isSaving ? '저장 중...' : '저장'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function PreferredContentPage({
   onBack,
   contents = registeredContentMock,
   onSubmitContent,
+  onUpdateContent,
+  onDeleteContent,
 }) {
   const [registeredContents, setRegisteredContents] = useState(contents);
   const [draft, setDraft] = useState(null);
@@ -212,6 +278,7 @@ export default function PreferredContentPage({
   const [youtubeDialogOpen, setYoutubeDialogOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState('');
+  const [selectedContent, setSelectedContent] = useState(null);
   const fileInputRef = useRef(null);
   const objectUrlsRef = useRef(new Set());
 
@@ -221,7 +288,7 @@ export default function PreferredContentPage({
 
   useEffect(() => {
     document.querySelector('.screen-scroll')?.scrollTo({ top: 0 });
-  }, [draft]);
+  }, [draft, selectedContent]);
 
   const openDraft = (nextDraft) => {
     setDraft(nextDraft);
@@ -287,6 +354,27 @@ export default function PreferredContentPage({
     );
   }
 
+  if (selectedContent) {
+    return (
+      <ContentDetail
+        content={selectedContent}
+        onBack={() => setSelectedContent(null)}
+        onSave={async (updatedContent) => {
+          await onUpdateContent?.(updatedContent);
+          setRegisteredContents((current) => current.map((content) => (
+            content.id === updatedContent.id ? updatedContent : content
+          )));
+          setSelectedContent(null);
+        }}
+        onDelete={async (contentToDelete) => {
+          await onDeleteContent?.(contentToDelete);
+          setRegisteredContents((current) => current.filter((content) => content.id !== contentToDelete.id));
+          setSelectedContent(null);
+        }}
+      />
+    );
+  }
+
   return (
     <div className="preferred-content-page">
       <PreferredContentHeader title="선호 콘텐츠" onBack={onBack} />
@@ -301,6 +389,7 @@ export default function PreferredContentPage({
         contents={registeredContents}
         onChooseImage={() => fileInputRef.current?.click()}
         onChooseYoutube={() => setYoutubeDialogOpen(true)}
+        onSelectContent={setSelectedContent}
       />
       <YoutubeLinkDialog
         open={youtubeDialogOpen}
