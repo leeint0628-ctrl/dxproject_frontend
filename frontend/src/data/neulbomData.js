@@ -22,6 +22,19 @@ export const careFeatures = [
   },
 ];
 
+// DB 연동 전 대시보드 상태와 최근 돌봄 기록 예시입니다.
+export const careOverviewMock = {
+  status: '돌봄 중',
+  message: ['오늘도 평소처럼', '일상을 보내고 있어요'],
+  lastAppliance: '냉장고',
+};
+
+export const recentCareMock = [
+  { id: 'meal', title: '주방에서 식사를 안내했어요.', detail: '사용자가 냉장고 문을 열었어요.', time: '12:00' },
+  { id: 'rest', title: '거실에서 휴식을 안내했어요.', detail: '사용자가 냉장고 문을 열었어요.', time: '11:00' },
+  { id: 'water', title: '주방에서 물 마시기를 안내했어요.', detail: '사용자가 정수기를 사용했어요.', time: '09:20' },
+];
+
 // DB 연결 전 화면 확인용 데이터입니다. 이후 API 응답을 같은 형태로 전달하면 됩니다.
 export const applianceUsageMock = [
   {
@@ -59,7 +72,7 @@ export const applianceUsageMock = [
     icon: 'tv',
     status: '정상 작동 중',
     metricLabel: '이만큼 봤어요.',
-    value: '0.2',
+    value: '0.5',
     unit: '시간',
     history: [
       { at: '9월 17일 9시 23분 31초', value: '전원 켜짐' },

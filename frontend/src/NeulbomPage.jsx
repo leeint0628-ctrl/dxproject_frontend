@@ -5,7 +5,13 @@ import DailyLifeCarePage from './DailyLifeCarePage.jsx';
 import MealMedicationCarePage from './MealMedicationCarePage.jsx';
 import PreferredContentPage from './PreferredContentPage.jsx';
 import VoiceTrainingPage from './VoiceTrainingPage.jsx';
-import { applianceUsageMock, careFeatures, customCareSettings } from './data/neulbomData.js';
+import {
+  applianceUsageMock,
+  careFeatures,
+  careOverviewMock,
+  customCareSettings,
+  recentCareMock,
+} from './data/neulbomData.js';
 import { mealMedicationCareMock } from './data/mealMedicationData.js';
 import './neulbom.css';
 
@@ -67,12 +73,44 @@ function PageTabs({ activeTab, onChange }) {
   );
 }
 
-function EmergencyCard() {
+function CareTodayCard({ overview, recentCare }) {
+  const [expanded, setExpanded] = useState(false);
+
   return (
-    <section className="emergency-card" aria-label="긴급 알림">
-      <img src={asset('alert-error.svg')} alt="" />
-      <p>확인이 필요한 긴급 알림이 0건 있어요.</p>
-      <div className="emergency-detail">자세히 보기</div>
+    <section className="care-today-card" aria-label="오늘의 돌봄 상태">
+      <div className="care-today-summary">
+        <div className="care-today-copy">
+          <span className="care-today-status">{overview.status}</span>
+          <h2>{overview.message.map((line) => <span key={line}>{line}</span>)}</h2>
+          <p>최근 사용 가전: <strong>{overview.lastAppliance}</strong></p>
+        </div>
+        <img className="care-today-image" src={asset('care-today.png')} alt="" />
+      </div>
+      <div className="care-today-divider" />
+      {expanded && (
+        <div className="recent-care-list" id="recent-care-list">
+          {recentCare.map((item) => (
+            <div className="recent-care-entry" key={item.id}>
+              <div>
+                <strong>{item.title}</strong>
+                <span>{item.detail}</span>
+              </div>
+              <time>{item.time}</time>
+            </div>
+          ))}
+        </div>
+      )}
+      {expanded && <div className="care-today-divider" />}
+      <button
+        type="button"
+        className="recent-care-toggle"
+        aria-expanded={expanded}
+        aria-controls="recent-care-list"
+        onClick={() => setExpanded((current) => !current)}
+      >
+        <span>최근 돌봄 {expanded ? '닫기' : '보기'}</span>
+        <img src={asset(expanded ? 'recent-care-up.svg' : 'recent-care-down.svg')} alt="" />
+      </button>
     </section>
   );
 }
@@ -207,7 +245,7 @@ function ApplianceCard({ device, expanded, onToggle }) {
 }
 
 function ApplianceSection({ devices }) {
-  const [expandedDevices, setExpandedDevices] = useState(() => new Set());
+  const [expandedDevices, setExpandedDevices] = useState(() => new Set(['purifier', 'refrigerator', 'tv']));
 
   const toggleDevice = (id) => {
     setExpandedDevices((current) => {
@@ -285,7 +323,12 @@ function CustomCareSection({ onOpenVoice, onOpenContent }) {
   );
 }
 
-export default function NeulbomPage({ onBack, applianceUsage = applianceUsageMock }) {
+export default function NeulbomPage({
+  onBack,
+  applianceUsage = applianceUsageMock.filter((device) => ['purifier', 'refrigerator', 'tv'].includes(device.id)),
+  careOverview = careOverviewMock,
+  recentCare = recentCareMock,
+}) {
   const [activeTab, setActiveTab] = useState('care');
   const [subPage, setSubPage] = useState('dashboard');
   const [subPageReturn, setSubPageReturn] = useState('dashboard');
@@ -345,7 +388,7 @@ export default function NeulbomPage({ onBack, applianceUsage = applianceUsageMoc
         <PageTabs activeTab={activeTab} onChange={setActiveTab} />
         {activeTab === 'care' ? (
           <div className="care-content tab-panel tab-panel--care" key="care">
-            <EmergencyCard />
+            <CareTodayCard overview={careOverview} recentCare={recentCare} />
             <ManagedSummary />
             <CareFeatureList
               onOpenDailyLife={() => setSubPage('daily-life')}

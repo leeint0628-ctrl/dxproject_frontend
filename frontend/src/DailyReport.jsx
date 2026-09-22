@@ -25,39 +25,32 @@ function ReportSummary({ summary }) {
   );
 }
 
-function ReportChanges({ changes }) {
+function LifeTimeline({ entries }) {
   return (
     <section className="report-section">
-      <h2>확인할 변화</h2>
-      <div className="report-change-list">
-        {changes.map((change) => (
-          <article className="report-change-card" key={change.id}>
-            <div>
-              <h3>{change.title}</h3>
-              <p>{change.description}</p>
-            </div>
-            <img src={asset('report-chevron.svg')} alt="" />
-          </article>
+      <h2>오늘의 생활 흐름</h2>
+      <div className="report-timeline">
+        {entries.map((entry) => (
+          <div className="report-timeline-row" key={entry.id}>
+            <time>{entry.time}</time>
+            <span>{entry.description}</span>
+          </div>
         ))}
       </div>
     </section>
   );
 }
 
-function MajorActivities({ activities }) {
+function ReportChanges({ changes }) {
   return (
     <section className="report-section">
-      <h2>주요 생활</h2>
-      <div className="major-activity-grid">
-        {activities.map((activity) => (
-          <article className="major-activity-card" key={activity.id}>
-            <div>
-              <h3>{activity.label}</h3>
-              <strong>{activity.value}</strong>
-            </div>
-            <p className={`major-activity-comparison major-activity-comparison--${activity.tone}`}>
-              {activity.comparison}
-            </p>
+      <h2>평소와 다른 점</h2>
+      <div className="report-change-list">
+        {changes.map((change) => (
+          <article className="report-change-card" key={change.id}>
+            <h3>{change.title}</h3>
+            <p>{change.average}</p>
+            <p>{change.current}</p>
           </article>
         ))}
       </div>
@@ -70,8 +63,8 @@ export default function DailyReport({ report = dailyReportMock, onDateChange, on
     <div className="daily-report">
       <DateSelector date={report.date} onDateChange={onDateChange} />
       <ReportSummary summary={report.summary} />
-      <ReportChanges changes={report.changes} />
-      <MajorActivities activities={report.activities} />
+      <LifeTimeline entries={report.timeline || []} />
+      <ReportChanges changes={report.changes || []} />
       <button type="button" className="report-share-button" onClick={() => onShare?.(report)}>
         <img src={asset('share.svg')} alt="" />
         <span>공유하기</span>

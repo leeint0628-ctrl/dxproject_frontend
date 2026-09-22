@@ -1,30 +1,41 @@
-// DB 연결 전 화면 확인용 데이터입니다. API 응답도 이 형태로 맞추면 화면을 그대로 재사용할 수 있습니다.
+// DB 연결 전 데일리 리포트 화면 확인용 데이터입니다.
 export const dailyReportMock = {
   date: '2026년 9월 17일',
   summary:
-    '오늘은 평소와 비슷한 시간에 하루를 시작하고 식사 활동은 늦은 걸로 확인됐어요. 물 섭취량은 평소보다 조금 적었으며, TV 시청시간은 평소보다 길었어요.',
+    '오늘은 오전과 정오에 식사 후 설거지까지 생활이 이어졌어요. 오후에는 외출과 귀가가 확인됐고, 5시경에는 잠시 돌아왔다가 다시 외출한 기록이 있었어요. 저녁에는 거실에서 휴식했으며 TV는 오후에 약 2시간 22분 사용됐어요.',
+  timeline: [
+    { id: 'living-room', time: '07:10', description: '침실에서 거실로 이동했어요.' },
+    { id: 'breakfast', time: '07:35', description: '아침 식사를 했어요.' },
+    { id: 'tv', time: '09:20', description: '거실에서 TV를 시청했어요.' },
+    { id: 'water', time: '10:40', description: '정수기를 사용해 물을 마셨어요.' },
+    { id: 'lunch', time: '12:35', description: '점심 식사를 했어요.' },
+    { id: 'dishes', time: '13:05', description: '식사 후 설거지를 했어요.' },
+    { id: 'nap', time: '13:50', description: '거실에서 낮잠을 잤어요.' },
+  ],
   changes: [
     {
-      id: 'breakfast-time',
-      title: '아침 식사 시간이 평소보다 1시간 늦어요.',
-      description: '오늘 식사 시각: 9시 10분  |  평균 식사 시각: 8시 10분',
+      id: 'first-meal',
+      title: '첫 식사 행동이 평소보다 1시간 늦게 기록됐어요.',
+      average: '최근 한 달 평균 식사 시각: 08:28',
+      current: '오늘 식사 시각: 09:28',
     },
     {
       id: 'tv-time',
-      title: 'TV를 평소보다 1시간 40분 많이 봤어요.',
-      description: '오늘 시청 시간: 4시간 20분  |  평균 시청 시간: 6시간',
+      title: 'TV 사용시간이 평소보다 3시간 38분 짧았어요.',
+      average: '최근 한 달 평균 시청 시간: 6시간',
+      current: '오늘 시청 시간: 2시간 22분',
     },
     {
-      id: 'refrigerator-pause',
-      title: '냉장고를 연 뒤 다음 행동이 감지되지 않았어요.',
-      description: '오늘 냉장고 앞에서 5분간 아무 행동 없이 서 있었어요.',
+      id: 'outside-time',
+      title: '오늘은 외출한 시간이 평소보다 길었어요.',
+      average: '최근 한 달 평균 외출 시간: 2시간 50분',
+      current: '오늘 외출 시간: 4시간 25분',
     },
-  ],
-  activities: [
-    { id: 'first-motion', label: '첫 움직임', value: '7시 18분', comparison: '평소와 비슷해요.', tone: 'normal' },
-    { id: 'breakfast', label: '아침 식사', value: '9시 10분', comparison: '평소보다 1시간 늦어요.', tone: 'warning' },
-    { id: 'refrigerator', label: '냉장고 사용', value: '21회', comparison: '평소보다 3회 많아요.', tone: 'normal' },
-    { id: 'water', label: '수분 섭취', value: '1.2L', comparison: '평소보다 0.3L 적어요.', tone: 'normal' },
-    { id: 'tv', label: 'TV 시청', value: '6시간', comparison: '평소보다 1시간 40분 길어요.', tone: 'warning' },
+    {
+      id: 'water-intake',
+      title: '정수기 출수량이 평소보다 0.3L 적었어요.',
+      average: '최근 한 달 평균 출수량: 1.05L',
+      current: '오늘 출수량: 0.75L',
+    },
   ],
 };

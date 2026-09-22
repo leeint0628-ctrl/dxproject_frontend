@@ -126,45 +126,147 @@
   animation: tab-content-from-right 240ms ease-out;
 }
 
-.emergency-card {
+.care-today-card {
   display: flex;
   width: 100%;
-  height: 180px;
-  margin: 0;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 20px;
+  gap: 12px;
+  padding: 12px 20px;
   border-radius: 8px;
-  background: #f2dcdc;
+  background: #fefdfd;
 }
 
-.emergency-card > img {
-  display: block;
-  width: 48px;
-  height: 48px;
+.care-today-summary {
+  display: flex;
+  width: 100%;
+  min-height: 100px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 13px;
 }
 
-.emergency-card p {
+.care-today-copy {
+  display: flex;
+  width: 200px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.care-today-status {
+  padding: 4px 10px;
+  border-radius: 58px;
+  background: #46bf84;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.care-today-copy h2 {
+  display: flex;
   margin: 0;
-  font-size: 17px;
+  flex-direction: column;
+  color: #111;
+  font-size: 18px;
   font-weight: 600;
   line-height: 1.2;
-  letter-spacing: -0.45px;
+  letter-spacing: -0.3px;
 }
 
-.emergency-detail {
+.care-today-copy p {
+  margin: 0;
+  color: #616c7e;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.care-today-copy p strong {
+  margin-left: 4px;
+  font-weight: 600;
+}
+
+.care-today-image {
+  display: block;
+  width: 100px;
+  height: 100px;
+  flex: 0 0 100px;
+  object-fit: cover;
+}
+
+.care-today-divider {
+  width: calc(100% + 16px);
+  height: 1px;
+  background: #e9ebef;
+}
+
+.recent-care-toggle {
   display: flex;
-  width: 313px;
-  padding: 8px 0;
   align-items: center;
   justify-content: center;
-  border-radius: 18px;
-  background: #eff1f4;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  background: transparent;
   color: #4c5de9;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
   line-height: 1.2;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.recent-care-toggle img {
+  display: block;
+  width: 16px;
+  height: 16px;
+}
+
+.recent-care-list {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  gap: 16px;
+  animation: expand-history 180ms ease-out;
+}
+
+.recent-care-entry {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: #616c7e;
+}
+
+.recent-care-entry > div {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.recent-care-entry strong {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.recent-care-entry span {
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.recent-care-entry time {
+  flex: 0 0 auto;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1;
 }
 
 .managed-summary {
@@ -601,7 +703,7 @@
   display: flex;
   width: 100%;
   flex-direction: column;
-  gap: 12px;
+  gap: 24px;
 }
 
 .report-date-selector {
@@ -670,7 +772,7 @@
   width: 100%;
   margin: 0;
   color: #111;
-  font-size: 18px;
+  font-size: 15px;
   font-weight: 400;
   line-height: 1.4;
   letter-spacing: -0.35px;
@@ -694,21 +796,45 @@
 .report-change-card {
   display: flex;
   width: 100%;
-  min-height: 68px;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
+  min-height: 89px;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 6px;
   padding: 16px 12px;
   border-radius: 8px;
   background: #fff;
 }
 
-.report-change-card > div {
+.report-timeline {
   display: flex;
+  width: 100%;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 12px;
+  background: #fff;
+}
+
+.report-timeline-row {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 4px;
+  color: #111;
+  font-size: 16px;
+  line-height: 1.2;
+}
+
+.report-timeline-row time {
+  width: 48px;
+  flex: 0 0 48px;
+  font-weight: 600;
+}
+
+.report-timeline-row span {
   min-width: 0;
   flex: 1;
-  flex-direction: column;
-  gap: 6px;
+  font-weight: 400;
 }
 
 .report-change-card h3 {
@@ -718,26 +844,16 @@
   font-weight: 600;
   line-height: 1.2;
   letter-spacing: -0.35px;
-  white-space: nowrap;
+  word-break: keep-all;
 }
 
 .report-change-card p {
   margin: 0;
-  overflow: hidden;
   color: #616c7e;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 400;
   line-height: 1;
-  letter-spacing: -0.45px;
-  text-overflow: clip;
-  white-space: nowrap;
-}
-
-.report-change-card > img {
-  display: block;
-  width: 16px;
-  height: 16px;
-  flex: 0 0 16px;
+  letter-spacing: -0.3px;
 }
 
 .major-activity-grid {
