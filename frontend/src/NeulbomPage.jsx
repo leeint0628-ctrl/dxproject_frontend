@@ -4,6 +4,7 @@ import DailyReport from './DailyReport.jsx';
 import DailyLifeCarePage from './DailyLifeCarePage.jsx';
 import MealMedicationCarePage from './MealMedicationCarePage.jsx';
 import PreferredContentPage from './PreferredContentPage.jsx';
+import { GuardianRegistrationPage, ReportSharePage } from './ReportSharePage.jsx';
 import VoiceTrainingPage from './VoiceTrainingPage.jsx';
 import {
   applianceUsageMock,
@@ -13,6 +14,7 @@ import {
   recentCareMock,
 } from './data/neulbomData.js';
 import { mealMedicationCareMock } from './data/mealMedicationData.js';
+import { reportGuardiansMock } from './data/reportShareData.js';
 import './neulbom.css';
 
 const asset = (name) => `/assets/${name}`;
@@ -351,19 +353,35 @@ function CustomCareSection({ onOpenVoice, onOpenContent }) {
 export default function NeulbomPage({
   onBack,
   onRefreshCare,
+  onRegisterGuardian,
+  onShareGuardians,
   applianceUsage = applianceUsageMock,
   careOverview = careOverviewMock,
   recentCare = recentCareMock,
+  reportGuardians = reportGuardiansMock,
 }) {
   const [activeTab, setActiveTab] = useState('care');
   const [subPage, setSubPage] = useState('dashboard');
   const [subPageReturn, setSubPageReturn] = useState('dashboard');
   const [mealMedicationSettings, setMealMedicationSettings] = useState(mealMedicationCareMock);
   const [calmCareEnabled, setCalmCareEnabled] = useState(false);
+  const [guardians, setGuardians] = useState(reportGuardians);
 
   const openSubPage = (page, returnTo = 'dashboard') => {
     setSubPageReturn(returnTo);
     setSubPage(page);
+  };
+
+  const registerGuardian = async (guardian) => {
+    const savedGuardian = await onRegisterGuardian?.(guardian);
+    const nextGuardian = {
+      ...guardian,
+      ...savedGuardian,
+      id: savedGuardian?.id || `guardian-${Date.now()}`,
+    };
+
+    setGuardians((current) => [...current, nextGuardian]);
+    setSubPage('report-share');
   };
 
   if (subPage === 'voice') {
@@ -400,6 +418,26 @@ export default function NeulbomPage({
     );
   }
 
+  if (subPage === 'report-share') {
+    return (
+      <ReportSharePage
+        guardians={guardians}
+        onBack={() => setSubPage('dashboard')}
+        onAddGuardian={() => setSubPage('guardian-registration')}
+        onShare={onShareGuardians}
+      />
+    );
+  }
+
+  if (subPage === 'guardian-registration') {
+    return (
+      <GuardianRegistrationPage
+        onBack={() => setSubPage('report-share')}
+        onRegister={registerGuardian}
+      />
+    );
+  }
+
   return (
     <div className="neulbom-page">
       <PageHeader onBack={onBack} />
@@ -422,7 +460,7 @@ export default function NeulbomPage({
           </div>
         ) : (
           <div className="tab-panel tab-panel--report" key="report">
-            <DailyReport />
+            <DailyReport onShare={() => setSubPage('report-share')} />
           </div>
         )}
       </div>
